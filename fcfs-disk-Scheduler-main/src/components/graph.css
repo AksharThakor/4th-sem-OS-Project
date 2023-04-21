@@ -1,0 +1,19 @@
+.graph-container {
+    margin-top: 2rem;
+    width: 100%;
+    height: 30rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+  }
+  
+  .graph-container h2 {
+    margin: 1rem;
+  }
+  
+  .graph-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  

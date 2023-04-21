@@ -1,0 +1,73 @@
+// Test case 1
+// let p1 = [
+//     {
+//       arrival_time: 0,
+//       burst_time: 5,
+//       priority: 3
+//     },
+//     {
+//       arrival_time: 1,
+//       burst_time: 2,
+//       priority: 1
+//     },
+//     {
+//       arrival_time: 2,
+//       burst_time: 3,
+//       priority: 4
+//     }
+//   ];
+
+function priorityScheduling(p, n) {
+    let currentTime = 0;
+    let completed = 0;
+    let isCompleted = Array(100).fill(0);
+    let prev = 0;
+    let burstRemaining = p.map((x) => x.burstTime);
+    let totalTurnaroundTime = 0;
+    let totalWaitingTime = 0;
+    let total_response_time = 0;
+    let total_idle_time = 0;
+    while (completed !== n) {
+      let index = -1;
+      let max = Number.MAX_SAFE_INTEGER;
+      for (let i = 0; i < n; i++) {
+        if (p[i].arrival_time <= current_time && is_completed[i] === 0) {
+          if (p[i].priority < max) {
+            max = p[i].priority;
+            index = i;
+          }
+          if (p[i].priority === max) {
+            if (p[i].arrival_time < p[index].arrival_time) {
+              max = p[i].priority;
+              index = i;
+            }
+          }
+        }
+      }
+      if (index !== -1) {
+        if (burst_remaining[index] === p[index].burst_time) {
+          p[index].start_time = current_time;
+          total_idle_time += p[index].start_time - prev;
+        }
+        burst_remaining[index] -= 1;
+        current_time++;
+        prev = current_time;
+        if (burst_remaining[index] === 0) {
+          p[index].completion_time = current_time;
+          p[index].turnaround_time =
+            p[index].completion_time - p[index].arrival_time;
+          p[index].waiting_time = p[index].turnaround_time - p[index].burst_time;
+          p[index].response_time = p[index].start_time - p[index].arrival_time;
+          total_turnaround_time += p[index].turnaround_time;
+          total_waiting_time += p[index].waiting_time;
+          total_response_time += p[index].response_time;
+          is_completed[index] = 1;
+          completed++;
+        }
+      } else {
+        current_time++;
+      }
+    }
+    return p;
+  }
+  

@@ -1,0 +1,498 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <conio.h>
+
+#define MAX 100
+
+int p_id[MAX] = {-1};
+int arrival_time[MAX] = {-1};
+int burst_time[MAX] = {-1};
+int remaining_time[MAX] = {-1};
+int priority[MAX] = {-1};
+int idrepeat[MAX] = {-1};
+int timeslot_created;
+int t_p;
+
+typedef struct process
+{
+    int p_id_ll;
+    int arrival_time_ll;
+    int burst_time_ll;
+    int remaining_time_ll;
+    int priority_ll;
+    struct process *nextprocess;
+} process;
+
+typedef struct timeslot
+{
+    int time;   // like if shows 1 it means 1st sec/clockcycle whatever
+    int p_id_e; // pid of process in that timeslot and we will design in such a way that when pc is free pid 100 will be there
+    struct timeslot *nextslot;
+    process *processes;
+
+} timeslot;
+
+// declaring functions
+void insert_processes_inarr(int total_processes);
+void sort_p(int total_processes);
+int timeslotsreq(int total_processes);
+timeslot *create_timeslots(int max);
+timeslot *insert_processes_inll(timeslot *head, int total_processes);
+process *sortprocesslinkedlist(process *headprocess);
+timeslot *execute(timeslot *head);
+void printallprocesses();
+void makegantchart(timeslot *head);
+
+void insert_processes_inarr(int total_processes)
+{
+    srand(time(NULL));
+    int i;
+    for (i = 0; i < total_processes; i++)
+    {
+
+        p_id[i] = rand() % 100;
+        if (idrepeat[p_id[i]] == 1)
+        {
+            i--;
+            continue;
+        }
+
+        printf("\n\n\nEnter arrival time ");
+        scanf(" %d", &arrival_time[i]);
+        if (arrival_time[i] < 0)
+        {
+            printf("\nInvalid arrival time ");
+            exit(0);
+        }
+        printf("\nEnter burst time ");
+        scanf(" %d", &burst_time[i]);
+        if (burst_time[i] <= 0)
+        {
+            printf("\nInvalid burst time ");
+            exit(0);
+        }
+        printf("\nEnter priority ");
+        scanf(" %d", &priority[i]);
+        if (priority[i] < 0)
+        {
+            printf("\nInvalid priority ");
+            exit(0);
+        }
+    }
+
+    sort_p(total_processes);
+}
+
+void sort_p(int total_processes)
+{
+    int i, j;
+    for (i = 0; i < total_processes; i++)
+    {
+        for (j = i + 1; j < total_processes; j++)
+        {
+            if (arrival_time[j] < arrival_time[i])
+            {
+                int temp = arrival_time[i];
+                arrival_time[i] = arrival_time[j];
+                arrival_time[j] = temp;
+
+                int temp1 = p_id[i];
+                p_id[i] = p_id[j];
+                p_id[j] = temp1;
+
+                int temp2 = burst_time[i];
+                burst_time[i] = burst_time[j];
+                burst_time[j] = temp2;
+
+                int temp3 = priority[i];
+                priority[i] = priority[j];
+                priority[j] = temp3;
+            }
+            if (arrival_time[i] == arrival_time[j])
+            {
+                if (priority[j] < priority[i])
+                {
+                    int temp = arrival_time[i];
+                    arrival_time[i] = arrival_time[j];
+                    arrival_time[j] = temp;
+
+                    int temp1 = p_id[i];
+                    p_id[i] = p_id[j];
+                    p_id[j] = temp1;
+
+                    int temp2 = burst_time[i];
+                    burst_time[i] = burst_time[j];
+                    burst_time[j] = temp2;
+
+                    int temp3 = priority[i];
+                    priority[i] = priority[j];
+                    priority[j] = temp3;
+                }
+                if (priority[i] == priority[j])
+                {
+                    if (p_id[j] < p_id[i])
+                    {
+                        int temp = arrival_time[i];
+                        arrival_time[i] = arrival_time[j];
+                        arrival_time[j] = temp;
+
+                        int temp1 = p_id[i];
+                        p_id[i] = p_id[j];
+                        p_id[j] = temp1;
+
+                        int temp2 = burst_time[i];
+                        burst_time[i] = burst_time[j];
+                        burst_time[j] = temp2;
+
+                        int temp3 = priority[i];
+                        priority[i] = priority[j];
+                        priority[j] = temp3;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int timeslotsreq(int total_processes)
+{
+    int i;
+    int max = arrival_time[0];
+    for (i = 0; i < total_processes; i++)
+    {
+        if (max < arrival_time[i])
+        {
+            max = arrival_time[i];
+        }
+    }
+    for (i = 0; i < total_processes; i++)
+    {
+        max = max + burst_time[i];
+    }
+    return max;
+}
+
+timeslot *create_timeslots(int max)
+{
+    timeslot *head = (timeslot *)malloc(sizeof(timeslot));
+    head->time = 0;
+    head->p_id_e = 100;
+    head->nextslot = NULL;
+    head->processes = NULL;
+    timeslot *temp = head;
+    timeslot_created = 1; // was added due to there being a problem in execute function it's written there in comment
+    int i;
+    for (i = 1; i < max + 1; i++)
+    {
+        timeslot *newnode = (timeslot *)malloc(sizeof(timeslot));
+        newnode->time = i;
+        newnode->p_id_e = 100;
+        newnode->nextslot = NULL;
+        newnode->processes = NULL;
+        temp->nextslot = newnode;
+        temp = temp->nextslot;
+        timeslot_created = timeslot_created + 1;
+    }
+    return head;
+}
+
+timeslot *insert_processes_inll(timeslot *head, int total_processes)
+{
+
+    timeslot *temp = head;
+    for (int i = 0; i < total_processes; i++)
+    {
+
+        if (temp->time == arrival_time[i])
+        {
+            process *newnode = (process *)malloc(sizeof(process));
+            newnode->p_id_ll = p_id[i];
+            newnode->arrival_time_ll = arrival_time[i];
+            newnode->remaining_time_ll = burst_time[i];
+            newnode->burst_time_ll = burst_time[i];
+            newnode->priority_ll = priority[i];
+            newnode->nextprocess = NULL;
+
+            if (temp->processes == NULL)
+            {
+                temp->processes = newnode;
+            }
+            else
+            {
+                process *temp1 = temp->processes;
+                while (temp1->nextprocess != NULL)
+                {
+                    temp1 = temp1->nextprocess;
+                }
+                temp1->nextprocess = newnode;
+            }
+            continue;
+        }
+        temp = temp->nextslot;
+        i = i - 1;
+    }
+    return head;
+}
+
+process *sortprocesslinkedlist(process *headprocess)
+{
+    process *temp = headprocess;
+    while (temp != NULL)
+    {
+        process *temp1 = temp->nextprocess;
+        while (temp1 != NULL)
+        {
+            if (temp->priority_ll > temp1->priority_ll)
+            {
+                int temp2 = temp->p_id_ll;
+                temp->p_id_ll = temp1->p_id_ll;
+                temp1->p_id_ll = temp2;
+
+                int temp3 = temp->burst_time_ll;
+                temp->burst_time_ll = temp1->burst_time_ll;
+                temp1->burst_time_ll = temp3;
+
+                int temp4 = temp->priority_ll;
+                temp->priority_ll = temp1->priority_ll;
+                temp1->priority_ll = temp4;
+
+                int temp5 = temp->arrival_time_ll;
+                temp->arrival_time_ll = temp1->arrival_time_ll;
+                temp1->arrival_time_ll = temp5;
+
+                int temp6 = temp->remaining_time_ll;
+                temp->remaining_time_ll = temp1->remaining_time_ll;
+                temp1->remaining_time_ll = temp6;
+            }
+            if (temp->priority_ll == temp1->priority_ll)
+            {
+                if (temp->p_id_ll > temp1->p_id_ll)
+                {
+                    int temp2 = temp->p_id_ll;
+                    temp->p_id_ll = temp1->p_id_ll;
+                    temp1->p_id_ll = temp2;
+
+                    int temp3 = temp->burst_time_ll;
+                    temp->burst_time_ll = temp1->burst_time_ll;
+                    temp1->burst_time_ll = temp3;
+
+                    int temp4 = temp->priority_ll;
+                    temp->priority_ll = temp1->priority_ll;
+                    temp1->priority_ll = temp4;
+
+                    int temp5 = temp->arrival_time_ll;
+                    temp->arrival_time_ll = temp1->arrival_time_ll;
+                    temp1->arrival_time_ll = temp5;
+
+                    int temp6 = temp->remaining_time_ll;
+                    temp->remaining_time_ll = temp1->remaining_time_ll;
+                    temp1->remaining_time_ll = temp6;
+                }
+            }
+            temp1 = temp1->nextprocess;
+        }
+        temp = temp->nextprocess;
+    }
+    return headprocess;
+}
+
+timeslot *execute(timeslot *head)
+{
+    timeslot *temp = head;
+    while (temp != NULL)
+    {
+        printf("\n\nExecuting at %d", temp->time);
+        if (temp->processes == NULL)
+        {
+            temp->p_id_e = 100;
+            temp = temp->nextslot;
+            printf("\nEntered first 'if', meant there was no p at %d ", temp->time);
+            if (temp->time == timeslot_created - 1)
+            {
+                break;
+            } // added because when this if not added when program reached at last timeslot it was giving some error got stuck somewhere didn't run correctly
+            continue;
+        }
+        else
+        {
+
+            process *temp1 = temp->processes;
+            temp->p_id_e = temp1->p_id_ll;
+            temp1->remaining_time_ll = temp1->remaining_time_ll - 1;
+            printf("\nEntered first 'if's else, meant there was a p at %d ", temp->time);
+            if (temp1->remaining_time_ll == 0)
+            {
+
+                temp->processes = temp1->nextprocess;
+                free(temp1);
+                printf("\nEntered nested'if' of first if, meant there was a p at %d and it was completed ", temp->time);
+                if (temp->processes == NULL)
+                {
+                    int t = temp->time;
+                    temp = temp->nextslot;
+                    printf("\nEntered nested 'if' of nested if of first if, meant there was a p at %d and it was completed and there was no p in the nextprocess", t);
+                    continue;
+                }
+            }
+        }
+
+        if (temp->nextslot->processes == NULL)
+        {
+
+            temp->nextslot->processes = temp->processes;
+            temp->processes = NULL;
+            printf("\nEntered second 'if', meant there was no p at %d ", temp->nextslot->time);
+        }
+        else
+        {
+
+            process *temp2 = temp->processes;
+            while (temp2->nextprocess != NULL)
+            {
+                temp2 = temp2->nextprocess;
+            }
+            temp2->nextprocess = temp->nextslot->processes;
+            temp->nextslot->processes = temp->processes;
+            temp->processes = NULL;
+            temp->nextslot->processes = sortprocesslinkedlist(temp->nextslot->processes);
+            printf("\nEntered second 'if's else, meant there was a p at %d ", temp->nextslot->time);
+        }
+        temp = temp->nextslot;
+    }
+    return head;
+}
+
+void printallprocesses()
+{
+
+    printf("\n\n");
+    printf("processes that were executed");
+
+    for (int i = 0; i < t_p; i++)
+    {
+        printf("\n");
+        printf("--------------------------------------------------------");
+        printf("\nProcess id %d", p_id[i]);
+        printf("\nBurst time %d", burst_time[i]);
+        printf("\nPriority %d", priority[i]);
+        printf("\nArrival time %d", arrival_time[i]);
+        printf("\n---------------------------------------------------------");
+    }
+}
+
+void makegantchart(timeslot *head)
+{
+    system("cls");
+    printf("\n\n\n");
+    timeslot *temp = head;
+    int i = 0;
+    int headdone = 0;
+
+    while (i < timeslot_created)
+    {
+        system("cls");
+        timeslot *temp = head;
+
+        if (headdone = 0)
+        {
+            printf("+");
+            for (int j = 0; j < (i + 1) * 12; j++)
+            {
+                printf("-");
+            }
+            printf("+");
+            printf("\n");
+            printf("| p_id (NA) ");
+            temp = temp->nextslot;
+            printf("\n");
+            printf("+");
+            for (int j = 0; j < (i + 1) * 12; j++)
+            {
+                printf("-");
+            }
+            printf("+");
+            printf("\n");
+
+            sleep(1);
+            i++;
+            headdone = 1;
+
+            continue;
+        }
+        printf("+");
+        for (int j = 0; j < (i + 1) * 12; j++)
+        {
+            printf("-");
+        }
+        printf("+");
+        printf("\n");
+        while (temp->time <= i)
+        {
+            if (temp->p_id_e < 10)
+            {
+
+                printf("| p_id (0%d) ", temp->p_id_e);
+            }
+            else if (temp->p_id_e < 100)
+            {
+
+                printf("| p_id (%d) ", temp->p_id_e);
+            }
+            else
+            {
+
+                printf("| p_id (NA) ");
+            }
+            temp = temp->nextslot;
+            if (temp == NULL)
+            {
+                break;
+            }
+        }
+        printf("|");
+
+        printf("\n");
+        printf("+");
+        for (int j = 0; j < (i + 1) * 12; j++)
+        {
+            printf("-");
+        }
+        printf("+");
+        printf("\n");
+
+        sleep(1);
+        i++;
+    }
+
+    printallprocesses();
+    
+}
+
+
+
+void main()
+{
+    system("color 72");
+    
+    char ch;
+    int total_processes;
+    printf("\nInsert total processes ");
+    scanf(" %d", &total_processes);
+    t_p = total_processes;
+    if (total_processes <= 0)
+    {
+        printf("\nInvalid number of processes ");
+        exit(0);
+    }
+    insert_processes_inarr(total_processes);
+    int max = timeslotsreq(total_processes);
+    timeslot *head = create_timeslots(max);
+    head = insert_processes_inll(head, total_processes);
+    head=execute(head);
+    makegantchart(head);
+    getch();
+}

@@ -1,0 +1,65 @@
+const calculateProcess = (processes) => {
+
+    let currentTime = 0;
+    let completed = 0;
+    let prev = 0;
+    const n = processes.length;
+    let isCompleted=[n];
+    let burstRemaining = [];
+
+    for (let k =0; k<n ; k++){
+        burstRemaining[k]= processes[k].burstTime;
+    }
+
+
+    while(completed != n){
+        let idx = -1;
+        let mx = -1;
+
+        for( let i=0; i<n;i++){
+            if(processes[i].arrivalTime <= currentTime && isCompleted[i]==0 ){
+
+                if(processes[i].priority > mx){
+                    mx = processes[i].priority;
+                    idx = i;
+                }
+
+                if(processes[i].priority== mx){
+                    if(processes[i].arrivalTime < processes[idx]){
+                        mx = processes[i].priority;
+                        idx = i;
+                    }
+                }
+            }
+        }
+
+        if(idx != -1){
+            if(burstRemaining[idx]== processes[idx].burstTime){
+                processes[idx].startTime = currentTime;
+                totalIdleTime += processes[idx].startTime-prev;
+            }
+
+            burstRemaining[idx]-=1;
+            currentTime++;
+            prev = currentTime;
+
+            if(burstRemaining[idx]==0){
+                processes[idx].completionTime = currentTime;
+                processes[idx].turnAroundTime = processes[idx].completionTime - processes[idx].arrivalTime;
+                processes[idx].waitingTime = processes[idx].turnAroundTime - processes[idx].burstTime;
+                processes[idx].responseTime = processes[idx].startTime- processes[idx].arrivalTime;
+
+                isCompleted[idx]=1;
+                completed++;
+            }
+
+        }
+
+        else{
+            currentTime++;
+        }
+    }
+
+    return;
+
+}

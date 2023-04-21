@@ -1,0 +1,102 @@
+.disk-simulator {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Montserrat', sans-serif;
+    color: #333;
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .inputs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+  
+  form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  input[type="number"] {
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 0.5rem;
+  }
+  
+  button[type="submit"],
+  button[type="button"] {
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #0077cc;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  button[type="submit"]:hover,
+  button[type="button"]:hover {
+    background-color: #005599;
+  }
+  
+  label {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  #current-position {
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 0.5rem;
+    width: 120px;
+  }
+  
+  .table-container {
+    max-height: 400px; /* set the maximum height for the table */
+    overflow-y: scroll; /* enable vertical scrolling */
+  }
+  
+  table {
+    width: 100%;
+    table-layout: fixed; /* set the table layout to fixed */
+    border-collapse: collapse;
+  }
+  
+  th,
+  td {
+    padding: 1rem;
+    text-align: center;
+    white-space: nowrap; /* prevent text wrapping */
+    overflow: hidden; /* hide any overflow */
+    text-overflow: ellipsis; /* show ellipsis for any truncated text */
+  }
+  
+  thead {
+    background-color: #0077cc;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1; /* set a z-index to keep the header on top */
+  }
+  
+  tbody {
+    position: relative;
+    z-index: 0; /* set a lower z-index for the body */
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  

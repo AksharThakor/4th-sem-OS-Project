@@ -1,11 +1,7 @@
-# 4th-sem-OS-Project
-Project OS simulators
+# OS Simulators
 
+This Repo has resources of a webapp that is a simulator for core concepts of OS. The project is about creating simulator for various concepts of Operating Systems such as CPU Scheduling, Synchronization, Disk Scheduling, and Page Replacement Algorithms. This project provides an interactive way for users to get to know these OS concepts in a userfriendly manner.
 
-Hiya!!
+C/C++ was used as testbed for simulator logic, HTML-CSS and Vanilla JS for the Webapp and Docker for deployment.
 
-This is Akshar Thakor student of CSE 2nd year at PDEU.
-
-This Rep shows the OS project we've done in this 4th semester. The project is about various concepts of Operating Systems such as CPU Scheduling, Synchronization, Disk Scheduling, and Page Replacement Algorithms. This project provides an interactive way for users to get to know these OS concepts in an interactive manner.
-
-This has all the codes done in development of the project
+<img width="959" height="539" alt="image" src="https://github.com/user-attachments/assets/8e69aedf-fdbf-4e60-a9a6-1ef095fa346f" />

@@ -4,4 +4,6 @@ This Repo has resources of a webapp that is a simulator for core concepts of OS.
 
 C/C++ was used as testbed for simulator logic, HTML-CSS and Vanilla JS for the Webapp and Docker for deployment.
 
+___
+
 <img width="959" height="539" alt="image" src="https://github.com/user-attachments/assets/8e69aedf-fdbf-4e60-a9a6-1ef095fa346f" />
